@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>UNES demo!</title>
+    
+    <!-- add jsPdf to enable PDF export -->
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+
+
+    <script src="../fathgrid.js" ></script>
+
+    <style>
+      tr.selected td:nth-child(1) {border-left:solid 4px cornflowerblue;}
+      tr.selected > td{background:#ddd;}
+      tr.subgrid > td {border-left:solid 4px cornflowerblue;border-bottom: solid 2px #ddd}
+    </style>
+
+  </head>
+  <body>
+      <div class="container-fluid">
+    <h1>UNES Question 2</h1>
+    <p>When a row is selected, form is initialized to allow data editing.</p>
+
+    <div style="display: flex;">
+      <div style="flex-grow: 1">Records per page: <select onchange="t1.setPageSize(this.value)"><option value="5">5</option><option selected value="10">10</option><option value="20">20</option><option value="50">50</option></select></div>
+      <div style="flex-grow: 1">
+        
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">Search</span>
+          </div>
+          <input onchange="t1.search(this.value)" type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+        </div>        
+      </div>
+    </div>
+
+
+    <div class="row" style="position: relative;">
+      <div class="col-md-12">
+          <table  id="table1" class="table table-bordered ">       <thead class="thead-light"></thead> </table>
+      </div>
+        <!--buttons start-->
+        <button onclick="localStorage.setItem('table1',JSON.stringify(t1.getData()))">Save data</button> 
+    <button onclick="t1.setData(JSON.parse(localStorage.getItem('table1')))">Load data</button>
+        <!--buttons stop-->
+      <div id="form1" class="" style="position:absolute;right: 1em; width: 0;transition-duration: 0.5s;overflow: hidden;">
+
+        <div class="modal-content" style="background: #aaa;">
+          <div class="modal-header">
+            
+            <h5 class="modal-title">Form</h5>
+            <button type="button" class="close" onclick="document.querySelector('#form1').style.width=0">&times;</button>
+          </div>
+          <div class="modal-body">
+              <div id="form-container">(select record)</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="f1.reset()">Reset</button>
+            <button type="button" class="btn btn-primary" onclick="f1.save()">Save</button>
+          </div>
+        </div>        
+      </div>
+      
+    </div>
+
+  </div>
+  
+        <script>
+//unique 11 character indentifier generator
+function randomStr(len, arr) { 
+            var ans = ''; 
+            for (var i = len; i > 0; i--) { 
+                ans +=  
+                  arr[Math.floor(Math.random() * arr.length)]; 
+            } 
+            return ans; 
+        } 
+///some demo data to get started
+var demodata=[
+  [randomStr(20, '12345abcde'),'Nyamira Hospital', 'level 1', 'Nyamira County'],
+  [randomStr(20, '12345abcde'),'Mteza Dispensary', 10, 'Kwale County'],
+  [randomStr(20, '12345abcde'),'Goods', 5, 2000],
+];
+
+
+var t1=FathGrid("table1",{
+      size:10,
+      editable:true,
+      filterable:true,
+      sortable:true,
+      showFooter:true,
+      onChange:function(item,col,old,value){console.log("onChange:",item,col,old,value);return value==''?false:true;},
+
+      columns:[
+        {header:'Code',pattern:'[0-9]{1,10}',title:'Must be numeric',editable:false,footer:`<button class="btn btn-secondary" onclick="t1.insertRow(null,[randomStr(20, '12345abcde'),'',0,0])">Add row</button>`},
+        {header:'Name'},
+        {header:'Title'},
+        {header:'Body'},
+        {header:' Delete',filterable:false,editable:false,html:x=>`<a href="#" class="btn btn-danger btn-sm" onclick="t1.deleteRow(${x.rownum});return false;">&#x2717;</a>`}
+      ],
+      data:demodata,
+
+      graphValues:(data)=>({title:'Item amounts',labels:data.map(x=>x[1]),values:data.map(item=>item[3]*item[2])}),
+      graphType:'bar',
+
+    });
+    
+    </script>  
+  </body>
+</html>
+
+
+
